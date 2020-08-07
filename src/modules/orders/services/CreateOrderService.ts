@@ -56,8 +56,6 @@ class CreateOrderService {
       throw new AppError('Producsts quantity is invalid.');
     }
 
-    await this.productsRepository.updateQuantity(products);
-
     const productsFormatted = produtosFind.map((product, index) => {
       return {
         price: product.price,
@@ -70,6 +68,17 @@ class CreateOrderService {
       customer,
       products: productsFormatted,
     });
+
+    const { order_products } = orderSalved;
+
+    const orderedProductsQuantity = order_products.map(product => ({
+      id: product.product_id,
+      quantity:
+        produtosFind.filter(p => p.id === product.product_id)[0].quantity -
+        product.quantity,
+    }));
+
+    await this.productsRepository.updateQuantity(orderedProductsQuantity);
 
     return orderSalved;
   }
